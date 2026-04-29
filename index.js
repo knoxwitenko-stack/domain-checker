@@ -54,3 +54,35 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(TOKEN);
+for (const domain of domains) {
+  try {
+    const res = await fetch(
+      `https://bdyoutube.org/api/check?domains=${domain}`,
+      {
+        headers: {
+          "x-api-key": process.env.API_KEY
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    // fake pricing logic (IONOS-style filter)
+    const likelyCheap =
+      domain.endsWith(".com") ||
+      domain.endsWith(".net") ||
+      domain.endsWith(".org");
+
+    results.push({
+      domain,
+      available: data?.available ?? "unknown",
+      likely_under_10_usd: likelyCheap
+    });
+
+  } catch (err) {
+    results.push({
+      domain,
+      error: "Request failed"
+    });
+  }
+}
